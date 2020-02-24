@@ -54,6 +54,9 @@ module Appsignal
     end
 
     def transmit(payload)
+      # Sample down requests to 1/100th of actual calls
+      return unless Random.rand(100) == 0
+
       config.logger.debug "Transmitting payload to #{uri}"
       http_client.request(http_post(payload))
     end
