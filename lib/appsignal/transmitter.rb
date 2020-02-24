@@ -39,6 +39,15 @@ module Appsignal
           "#{config[:endpoint]}/1/#{base_uri}"
         end
       @config = config
+
+      # Sample down requests to 1/100th of actual calls
+      @track_request = [
+        ENV["RAILS_ENV"] == "test",
+        [Marker::ACTION, AuthCheck::ACTION].include?(base_uri),
+        Random.rand(100) == 0
+      ].any?
+
+      puts @track_request
     end
 
     def uri
@@ -54,8 +63,7 @@ module Appsignal
     end
 
     def transmit(payload)
-      # Sample down requests to 1/100th of actual calls
-      return unless Random.rand(100) == 0
+      return unless @track_request
 
       config.logger.debug "Transmitting payload to #{uri}"
       http_client.request(http_post(payload))
