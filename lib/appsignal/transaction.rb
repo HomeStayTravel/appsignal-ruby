@@ -96,7 +96,7 @@ module Appsignal
     end
 
     def complete
-      if discarded?
+      if discarded? || skip_transaction?
         Appsignal.logger.debug "Skipping transaction '#{transaction_id}' " \
           "because it was manually discarded."
         return
@@ -129,6 +129,10 @@ module Appsignal
 
     def discarded?
       @discarded == true
+    end
+
+    def skip_transaction?
+      Random.rand(100) != 0
     end
 
     def store(key)
